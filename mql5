@@ -1,0 +1,73 @@
+
+//+------------------------------------------------------------------+
+//|                                     Immortal Bird MT5           |
+//|                          Developer's site: forexroboteasy.com    |
+//|                          Development: Forex Robot Easy Team      |
+//+------------------------------------------------------------------+
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <MovingAverages\MovingAverages.mqh>
+
+// Declare global variables
+CTrade m_trade;   // Trading object
+CMovingAverages m_ma;   // Moving average object
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Initialize trade object
+    m_trade.Init(Symbol());
+
+    // Initialize moving average object
+    m_ma.Init(Symbol(), PERIOD_M5, MODE_SMA, 50, PRICE_CLOSE);
+
+    // Return initialization result
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Perform necessary cleanup
+    m_trade.Deinit();
+    m_ma.Deinit();
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+    // Check if the moving average indicator has crossed the price
+    if(m_ma.Crossed(PRICE_CLOSE))
+    {
+        // Place a buy trade if the indicator crossed from below
+        if(m_ma.CrossedUp(PRICE_CLOSE))
+        {
+            m_trade.Buy(Symbol(), 0.1, Ask, 10, 0, 0, 'Immortal Bird MT5');
+        }
+        // Place a sell trade if the indicator crossed from above
+        else if(m_ma.CrossedDown(PRICE_CLOSE))
+        {
+            m_trade.Sell(Symbol(), 0.1, Bid, 10, 0, 0, 'Immortal Bird MT5');
+        }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnStart()
+{
+    // Run the expert advisor
+    while(!IsStopped())
+    {
+        OnTick();
+        Sleep(1000);  // Delay between ticks
+    }
+}
